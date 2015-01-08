@@ -31,7 +31,7 @@ public class MainActivity extends ActionBarActivity {
     ListView contactListView;
     Uri imageUri = Uri.parse("android.resource://org.intracode.contactmanager/drawable/no_user_logo.png");
     DatabaseHandler dbHandler;
-    int longClickedItemIndex;
+    int longClickedItemIndex2;
     ArrayAdapter<Contact> contactAdapter;
 
     @Override
@@ -82,7 +82,6 @@ public class MainActivity extends ActionBarActivity {
         nameTxt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-
             }
 
             @Override
