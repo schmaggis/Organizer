@@ -31,7 +31,7 @@ public class MainActivity extends ActionBarActivity {
     ListView contactListView;
     Uri imageUri = Uri.parse("android.resource://org.intracode.contactmanager/drawable/no_user_logo.png");
     DatabaseHandler dbHandler;
-    int longClickedItemIndex2;
+    int longClickedItemIndex;
     ArrayAdapter<Contact> contactAdapter;
 
     @Override
