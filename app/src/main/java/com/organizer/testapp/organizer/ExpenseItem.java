@@ -14,34 +14,23 @@ public class ExpenseItem extends Item {
     private int _creditor_id; //person who paid the amount
     private double _creditor_amount; //whole amount that was paid
 
-    //private List<DebitorContact> DebitorContacts = new ArrayList<DebitorContact>();
+    private List<DebitorContact> _DebitorContacts = new ArrayList<DebitorContact>();
     // List of debitors who have to pay a share of the amount paid by the creditor
-    // => in Datenbank hintgerlegt: DebitorContacts
+    // ToDo: in Datenbank hintgerlegt: DebitorContacts
 
-    public ExpenseItem (int item_id, String name, String category, Date date, Uri imageURI, int creditor_id, double amount) {
+    public ExpenseItem (int item_id, String name, String category, Date date, Uri imageURI, int creditor_id, double amount, List DebitorContacts) {
         super(item_id, name, category, date, imageURI);
 
         _creditor_id = creditor_id;
         _creditor_amount = amount;
+        _DebitorContacts = DebitorContacts;
     }
 
-    public int get_creditor_id() {
-        return _creditor_id;
-    }
+    public int get_creditor_id() { return _creditor_id; }
+    public double get_creditor_amount() { return _creditor_amount; }
+    public List<DebitorContact> get_all_debitor_contacts() { return _DebitorContacts; }
 
-    public double get_creditor_amount() {
-        return _creditor_amount;
-    }
+    public void addDebitorContact(DebitorContact debitorContact) { _DebitorContacts.add(debitorContact); }
+    public void addAllDebitorContact(List<DebitorContact> debitorContacts) { _DebitorContacts = debitorContacts; }
 
-    public List<DebitorContact> getDebitorContacts() {
-        List<DebitorContact> debitors = new ArrayList<DebitorContact>();
-        //ToDo:
-        //debitors.addAll(GetDebitorsOfItemFromDatabase(super.getId()));
-        return debitors;
-    }
-
-    public void addDebitorContacts(DebitorContact debitorContact) {
-        //ToDo:
-        // DebitorContacts.add(debitorContact);
-    }
 }

@@ -69,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View view) {
                 Contact contact = new Contact(dbHandler.getContactsCount(), String.valueOf(nameTxt.getText()), String.valueOf(phoneTxt.getText()), String.valueOf(emailTxt.getText()), String.valueOf(addressTxt.getText()), imageUri);
                 if (!contactExists(contact)) {
-                    dbHandler.createContact(contact);
+                    dbHandler.insertContact(contact);
                     Contacts.add(contact);
                     contactAdapter.notifyDataSetChanged();
                     Toast.makeText(getApplicationContext(), String.valueOf(nameTxt.getText()) + " has been added to your Contacts!", Toast.LENGTH_SHORT).show();

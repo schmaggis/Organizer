@@ -19,7 +19,7 @@ public class DebitorContact {
         _amount = amount;
     }
 
-    public int get_id() {
+    public int getId() {
         return _id;
     }
 

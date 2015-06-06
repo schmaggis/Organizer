@@ -63,6 +63,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_DEBITORS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXPENSE_ITEMS);
 
         onCreate(db);
@@ -72,7 +73,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     /* *** CONTACT - METHODS *** */
     /*****************************/
 
-    public void createContact(Contact contact) {
+    public void insertContact(Contact contact) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -153,11 +154,141 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 
     /*****************************/
+    /* *** DebitorContact - METHODS *** */
+    /*****************************/
+
+    public void insertDebitorContact(DebitorContact dContact) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_DEBITOR_CONTACT_ID, dContact.getDebitorContactId());
+        values.put(KEY_ITEM_ID, dContact.getItemId());
+        values.put(KEY_AMOUNT, dContact.getAmount());
+
+        db.insert(TABLE_DEBITORS, null, values);
+        db.close();
+    }
+
+    public DebitorContact getDebitorContact(int id) {
+        DebitorContact _dContact = null;
+
+        int _debitor_contact_id;
+        int _item_id;
+        Double _amount;
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE_DEBITORS, new String[] { KEY_ID, KEY_DEBITOR_CONTACT_ID, KEY_ITEM_ID, KEY_AMOUNT }, KEY_ID + "=?", new String[] { String.valueOf(id) }, null, null, null, null );
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+
+            _debitor_contact_id = Integer.parseInt(cursor.getString(1));
+            _item_id = Integer.parseInt(cursor.getString(2));
+            _amount = Double.parseDouble(cursor.getString(3));
+
+            _dContact = new DebitorContact(id, _debitor_contact_id, _item_id, _amount);
+        }
+
+        db.close();
+        cursor.close();
+        return _dContact;
+    }
+
+    public void deleteDebitorContact(DebitorContact dContact) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(TABLE_DEBITORS, KEY_ID + "=?", new String[] { String.valueOf(dContact.getId()) });
+        db.close();
+    }
+
+    public int getDebitorContactCount() {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_DEBITORS, null);
+        int count = cursor.getCount();
+        db.close();
+        cursor.close();
+
+        return count;
+    }
+
+    public int updateDebitorContact(DebitorContact dContact) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_DEBITOR_CONTACT_ID, dContact.getDebitorContactId());
+        values.put(KEY_ITEM_ID, dContact.getItemId());
+        values.put(KEY_AMOUNT, dContact.getAmount());
+
+        int rowsAffected = db.update(TABLE_DEBITORS, values, KEY_ID + "=?", new String[] { String.valueOf(dContact.getId()) });
+        db.close();
+
+        return rowsAffected;
+    }
+
+    public List<DebitorContact> getAllDebitorContacts() {
+        List<DebitorContact> _debitorContacts = new ArrayList<DebitorContact>();
+
+        int _id;
+        int _debitor_contact_id;
+        int _item_id;
+        Double _amount;
+
+
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_DEBITORS, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                _id = Integer.parseInt(cursor.getString(0));
+                _debitor_contact_id = Integer.parseInt(cursor.getString(1));
+                _item_id = Integer.parseInt(cursor.getString(2));
+                _amount = Double.parseDouble(cursor.getString(3));
+
+                _debitorContacts.add(new DebitorContact(_id, _debitor_contact_id, _item_id, _amount));
+            }
+            while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return _debitorContacts;
+    }
+
+    public List<DebitorContact> getAllDebitorContactsOfExItem(int itemID) {
+        List<DebitorContact> _debitorContacts = new ArrayList<DebitorContact>();
+
+        int _id;
+        int _debitor_contact_id;
+        int _item_id;
+        Double _amount;
+
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE_DEBITORS, new String[] { KEY_ID, KEY_DEBITOR_CONTACT_ID, KEY_ITEM_ID, KEY_AMOUNT }, KEY_ITEM_ID + "=?", new String[] { String.valueOf(itemID) }, null, null, null, null );
+
+        if (cursor.moveToFirst()) {
+            do {
+                _id = Integer.parseInt(cursor.getString(0));
+                _debitor_contact_id = Integer.parseInt(cursor.getString(1));
+                _item_id = Integer.parseInt(cursor.getString(2));
+                _amount = Double.parseDouble(cursor.getString(3));
+
+                _debitorContacts.add(new DebitorContact(_id, _debitor_contact_id, _item_id, _amount));
+            }
+            while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return _debitorContacts;
+    }
+
+
+    /*****************************/
     /* *** Item - METHODS *** */
     /*****************************/
 
 
-    public void createExpenseItem(ExpenseItem item) {
+    public void insertExpenseItem(ExpenseItem item) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -188,22 +319,21 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(TABLE_EXPENSE_ITEMS, new String[] { KEY_ID, KEY_NAME, KEY_CATEGORY, KEY_DATE, KEY_IMAGEURI, KEY_CREDITOR_ID, KEY_AMOUNT }, KEY_ID + "=?", new String[] { String.valueOf(id) }, null, null, null, null );
 
-        if (cursor != null)
+        if (cursor != null) {
             cursor.moveToFirst();
 
-        try {
-            _name = cursor.getString(1);
-            _category = cursor.getString(2);
+            try {
+                _name = cursor.getString(1);
+                _category = cursor.getString(2);
+                _date = dateformat.parse(cursor.getString(3));
+                _imageuri = Uri.parse(cursor.getString(4));
+                _creditor_id = Integer.parseInt(cursor.getString(5));
+                _amount = Double.parseDouble(cursor.getString(6));
 
-            _date = dateformat.parse(cursor.getString(3));
-
-            _imageuri = Uri.parse(cursor.getString(4));
-            _creditor_id = Integer.parseInt(cursor.getString(5));
-            _amount = Double.parseDouble(cursor.getString(6));
-
-            item = new ExpenseItem(id, _name, _category, _date, _imageuri, _creditor_id, _amount);
-        } catch (ParseException e) {
-            e.printStackTrace();
+                item = new ExpenseItem(id, _name, _category, _date, _imageuri, _creditor_id, _amount, null);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
 
         db.close();
@@ -246,8 +376,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return rowsAffected;
     }
 
-    public List<ExpenseItem> getExpenseItems() {
-        List<ExpenseItem> expenseItems = new ArrayList<ExpenseItem>();
+    public List<ExpenseItem> getAllExpenseItems() {
+        List<ExpenseItem> _expenseItems = new ArrayList<ExpenseItem>();
 
         int _id;
         String _name;
@@ -255,8 +385,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Uri _imageuri;
         SimpleDateFormat dateformat = new SimpleDateFormat("YYYY-MM-DD");
         Date _date;
-        Double _amount;
         int _creditor_id;
+        Double _amount;
+        List<DebitorContact> _debitorContacts;
+
 
         SQLiteDatabase db = getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_EXPENSE_ITEMS, null);
@@ -267,14 +399,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     _id = Integer.parseInt(cursor.getString(0));
                     _name = cursor.getString(1);
                     _category = cursor.getString(2);
-
                     _date = dateformat.parse(cursor.getString(3));
-
                     _imageuri = Uri.parse(cursor.getString(4));
                     _creditor_id = Integer.parseInt(cursor.getString(5));
                     _amount = Double.parseDouble(cursor.getString(6));
 
-                    expenseItems.add(new ExpenseItem(_id, _name, _category, _date, _imageuri, _creditor_id, _amount));
+                    _debitorContacts = getAllDebitorContactsOfExItem(_id);
+
+                    _expenseItems.add(new ExpenseItem(_id, _name, _category, _date, _imageuri, _creditor_id, _amount, _debitorContacts));
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -283,8 +415,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         cursor.close();
         db.close();
-        return expenseItems;
+        return _expenseItems;
     }
-
-
 }
